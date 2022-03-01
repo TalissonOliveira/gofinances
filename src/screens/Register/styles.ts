@@ -1,4 +1,4 @@
-import styled, { ThemeConsumer } from 'styled-components/native'
+import styled from 'styled-components/native'
 import { RFValue } from 'react-native-responsive-fontsize'
 
 export const Container = styled.View`
@@ -30,3 +30,9 @@ export const Form = styled.View`
 `
 
 export const Fields = styled.View``
+
+export const TransactionsTypes = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 8px;
+`
