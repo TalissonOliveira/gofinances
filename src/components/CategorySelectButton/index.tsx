@@ -3,12 +3,16 @@ import { Category, Container, Icon } from './styles'
 
 interface Props {
   title: string
+  onPress: () => void
 }
 
-export function CategorySelectButton({ title }: Props) {
+export function CategorySelectButton({
+  title,
+  onPress
+}: Props) {
   return (
-    <Container>
-      <Category>{title}</Category>
+    <Container onPress={onPress}>
+      <Category name={title}>{title}</Category>
       <Icon name="chevron-down" />
     </Container>
   )
