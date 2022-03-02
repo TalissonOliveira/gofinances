@@ -6,7 +6,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Dashboard } from '../screens/Dashboard'
 import { Register } from '../screens/Register'
 
-const { Navigator, Screen } = createBottomTabNavigator()
+const { Navigator, Screen } = createBottomTabNavigator<AppRoutesParamList>()
+
+export type AppRoutesParamList = {
+  Listagem: undefined
+  Cadastrar: undefined
+  Resumo: undefined
+}
 
 export function AppRoutes() {
   const theme = useTheme() // usar o tema do styled-components

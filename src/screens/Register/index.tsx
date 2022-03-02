@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
 import { Alert, Keyboard, Modal, TouchableWithoutFeedback } from 'react-native'
 import { useForm } from 'react-hook-form'
+import { useNavigation } from '@react-navigation/native'
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import uuid from 'react-native-uuid'
 
 import * as Yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -10,12 +15,18 @@ import { Button } from '../../components/Forms/Button'
 import { InputForm } from '../../components/Forms/InputForm'
 import { TransactionTypeButton } from '../../components/Forms/TransactionTypeButton'
 import { CategorySelect } from '../CategorySelect'
+import { AppRoutesParamList } from '../../routes/app.routes'
 
 import { Container, Fields, Form, Header, Title, TransactionsTypes } from './styles'
 
 interface FormData {
   [name: string]: any
 }
+
+type RegisterNavigationProps = BottomTabNavigationProp<
+  AppRoutesParamList,
+  'Cadastrar'
+>
 
 const schema = Yup.object().shape({
   name: Yup.string().required('Insira um nome'),
@@ -32,10 +43,11 @@ export function Register() {
     key: 'category',
     name: 'Categoria',
   })
-
+  const navigation = useNavigation<RegisterNavigationProps>()
   const {
     control, // registrar os inputs do formulário
     handleSubmit, // pegar todos os valores dos inputs do formulário e enviar
+    reset, // limpar o formulário
     formState: { errors } // capturar os erros do formulário
   } = useForm({
     resolver: yupResolver(schema)
@@ -53,7 +65,7 @@ export function Register() {
     setIsCategoryModalOpen(false)
   }
 
-  function handleRegister(form: FormData) {
+  async function handleRegister(form: FormData) {
     if (!transactionType) {
       return Alert.alert('Selecione o tipo da transação')
     }
@@ -62,13 +74,41 @@ export function Register() {
       return Alert.alert('Selecione a categoria da transação')
     }
 
-    const data = {
+    const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       transactionType,
-      category: category.key
+      category: category.key,
+      data: new Date()
     }
-    console.log(data)
+
+    try {
+      const dataKey = '@gofinances:transactions'
+
+      const data = await AsyncStorage.getItem(dataKey)
+      const currentData = data ? JSON.parse(data) : []
+
+      const dataFormatted = [
+        ...currentData,
+        newTransaction
+      ]
+
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
+
+      reset()
+      setTransactionType('')
+      setCategory({
+        key: 'category',
+        name: 'Categoria',
+      })
+
+      navigation.navigate('Listagem')
+
+    } catch (error) {
+      console.log(error)
+      Alert.alert('Não foi possível cadastrar a transação')
+    }
   }
 
   return (
